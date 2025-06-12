@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "telegram_bot"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
+    POSTGRES_ECHO_POOL: bool = False
+    POSTGRES_POOL_SIZE: int = 10
+    POSTGRES_CONNECTION_RETRY_PERIOD_SEC: int = 5
+
 
     @property
     def POSTGRES_URL(self) -> str:

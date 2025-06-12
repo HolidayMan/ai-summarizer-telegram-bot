@@ -10,9 +10,9 @@ from sqlalchemy.exc import DatabaseError, DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine, engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-from app.services.base import BaseService
-from app.services.postgresql.base_database import Database
-from app.services.postgresql.exceptions import (
+from app.external_services.base import BaseService
+from app.external_services.postgresql.base_database import Database
+from app.external_services.postgresql.exceptions import (
     DatabaseException,
     ForeignKeyNotFoundException,
     IncorrectColumnValueException,

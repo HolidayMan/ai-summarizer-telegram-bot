@@ -10,7 +10,6 @@ __all__ = ["Database", "SessionHandler"]
 
 
 class Database(Protocol):
-    """Target data store (DB) interface"""
 
     @abstractmethod
     def session(self) -> SessionHandler:
@@ -22,7 +21,6 @@ class Database(Protocol):
 
 
 class SessionHandler(Protocol):
-    """Intermediate class for managing temporarily-created session and handling exceptions."""
 
     @abstractmethod
     async def __aenter__(self) -> session.AsyncSession:
