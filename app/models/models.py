@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import BigInteger, String, Text, ForeignKey, Index, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime
+from datetime import datetime, time
 from app.models.base import ModelsBase
 import sqlalchemy as sa
 
@@ -24,7 +24,7 @@ class DocProcessingStatusEnum(sa.Enum):
 class User(ModelsBase):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)  # Telegram user ID
+    id: Mapped[int] = mapped_column(sa.BigInteger, primary_key=True)  # Telegram user ID
     username: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)  # Telegram username (handle)
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     last_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
@@ -36,7 +36,7 @@ class User(ModelsBase):
 class Chat(ModelsBase):
     __tablename__ = "chats"
 
-    id: Mapped[int] = mapped_column(sa.Integer, primary_key=True)  # Telegram chat ID
+    id: Mapped[int] = mapped_column(sa.BigInteger, primary_key=True)  # Telegram chat ID
     chat_title: Mapped[str] = mapped_column(String(255), nullable=False)
     bot_added_at: Mapped[datetime] = mapped_column(sa.DateTime, nullable=False, default=sa.func.now())
 
@@ -59,8 +59,7 @@ class ChatSettings(ModelsBase):
     id: None = None
 
     chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"), primary_key=True)
-    summary_time: Mapped[datetime] = mapped_column(Time, nullable=False)
-    settings_updated_at: Mapped[datetime] = mapped_column(sa.DateTime, nullable=False, default=sa.func.now())
+    summary_time: Mapped[time] = mapped_column(Time, nullable=False)
 
 
 class Message(ModelsBase):

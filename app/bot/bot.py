@@ -2,8 +2,6 @@ import aiogram
 from aiogram.client.default import DefaultBotProperties
 
 from app.settings import get_settings
-from app.external_services.external_services import ExternalServices
-from app.bot.dispatcher import dispatcher
 
 config = get_settings()
 BOT_TOKEN = config.BOT_TOKEN
