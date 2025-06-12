@@ -2,10 +2,11 @@ from datetime import time
 from datetime import datetime
 from typing import Sequence
 
+from aiogram.enums import ContentType
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from app.models.models import Chat, ChatAdmin, ChatSettings
+from app.models.models import Chat, ChatAdmin, ChatSettings, Message
 
 
 class ChatsRepository:
@@ -91,6 +92,31 @@ class ChatsRepository:
         chat.chat_title = title
         await session.commit()
         return True
+
+    async def add_message(
+        self,
+        chat_id: int,
+        user_id: int,
+        message_text: str | None,
+        message_type: ContentType,
+        sent_at: datetime,
+        session: AsyncSession
+    ) -> Message:
+        if sent_at is None:
+            sent_at = datetime.utcnow()
+            
+        message = Message(
+            chat_id=chat_id,
+            sender_user_id=user_id,
+            message_text=message_text,
+            message_type=message_type,
+            sent_at=sent_at
+        )
+        
+        session.add(message)
+        await session.commit()
+        await session.refresh(message)
+        return message
 
     async def set_summary_time(self, chat_id: int, time: time, session: AsyncSession) -> None:
         query = select(ChatSettings).where(ChatSettings.chat_id == chat_id)

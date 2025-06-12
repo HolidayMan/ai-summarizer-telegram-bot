@@ -1,6 +1,8 @@
+from enum import Enum
 from typing import Optional
 from uuid import UUID
 
+from aiogram.enums import ContentType
 from sqlalchemy import BigInteger, String, Text, ForeignKey, Index, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime, time
@@ -9,12 +11,7 @@ import sqlalchemy as sa
 
 
 # Enums
-class MessageTypeEnum(sa.Enum):
-    TEXT = "text"
-    DOCUMENT = "document"
-
-
-class DocProcessingStatusEnum(sa.Enum):
+class DocProcessingStatusEnum(Enum):
     PENDING = "pending"
     ANALYZED = "analyzed"
     ERROR = "error"
@@ -65,12 +62,12 @@ class ChatSettings(ModelsBase):
 class Message(ModelsBase):
     __tablename__ = "messages"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     chat_id: Mapped[int] = mapped_column(ForeignKey("chats.id"), nullable=False)
     sender_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     message_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    message_type: Mapped[MessageTypeEnum] = mapped_column(sa.String(50), nullable=False,
-                                                          default=MessageTypeEnum.TEXT)
+    message_type: Mapped[ContentType] = mapped_column(sa.String(50), nullable=False,
+                                                          default=ContentType.TEXT)
     sent_at: Mapped[datetime] = mapped_column(sa.DateTime, nullable=False)
     summary_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("summaries.id"), nullable=True)
 

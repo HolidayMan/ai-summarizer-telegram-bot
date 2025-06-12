@@ -1,6 +1,11 @@
 from typing import Sequence
 
-from datetime import time as time_type
+from datetime import time as time_type, datetime
+from typing import Optional
+
+from aiogram.enums import ContentType
+
+from app.models.models import Message
 from app.external_services.external_services import ExternalServices
 from app.models.models import Chat, User
 from app.repositories import Repositories
@@ -28,6 +33,25 @@ class ChatsService:
             await Repositories.chats.add_chat_admin(
                 chat_id=chat_id,
                 user_id=user_id,
+                session=session
+            )
+
+    async def add_message(
+        self,
+        chat_id: int,
+        user_id: int,
+        message_text: str | None,
+        message_type: ContentType,
+        sent_at: datetime
+    ) -> Message:
+
+        async with ExternalServices.database.session() as session:
+            return await Repositories.chats.add_message(
+                chat_id=chat_id,
+                user_id=user_id,
+                message_text=message_text,
+                message_type=message_type,
+                sent_at=sent_at,
                 session=session
             )
 

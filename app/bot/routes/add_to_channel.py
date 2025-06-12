@@ -1,9 +1,8 @@
 from aiogram import Router, types, F
 from aiogram.enums import ChatType
 from app.services import Services
-from app.models.models import User as DBUser
 
-router = Router(name="Set time")
+router = Router(name="Add to channel")
 
 @router.my_chat_member(F.chat.type.in_([ChatType.SUPERGROUP, ChatType.GROUP]))
 async def check_group_add(message: types.Message):
