@@ -141,3 +141,58 @@ class ChatsRepository:
         await session.flush()
         return document
 
+    async def get_chats_due_for_summary(self, now: datetime, session: AsyncSession) -> Sequence[int]:
+        """Return chat IDs whose :class:`ChatSettings.summary_time` matches *now* (hour & minute)."""
+        summary_time = time(hour=now.hour, minute=now.minute)
+        stmt = select(ChatSettings.chat_id).where(ChatSettings.summary_time == summary_time)
+        result = await session.execute(stmt)
+        return [row[0] for row in result.all()]
+
+    async def get_messages_between(
+        self,
+        chat_id: int,
+        since: datetime,
+        until: datetime,
+        session: AsyncSession,
+    ) -> Sequence[Message]:
+        # normalize datetimes to naive for TIMESTAMP WITHOUT TIME ZONE columns
+        if since.tzinfo is not None:
+            since = since.replace(tzinfo=None)
+        if until.tzinfo is not None:
+            until = until.replace(tzinfo=None)
+        stmt = (
+            select(Message)
+            .where(
+                Message.chat_id == chat_id,
+                Message.sent_at < until,
+                Message.sent_at > since,
+            )
+            .order_by(Message.sent_at)
+        )
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    async def get_documents_summaries_between(
+        self,
+        chat_id: int,
+        since: datetime,
+        until: datetime,
+        session: AsyncSession,
+    ) -> Sequence[str]:
+        # normalize datetimes to naive for TIMESTAMP WITHOUT TIME ZONE columns
+        if since.tzinfo is not None:
+            since = since.replace(tzinfo=None)
+        if until.tzinfo is not None:
+            until = until.replace(tzinfo=None)
+        stmt = (
+            select(Document.analysis_content)
+            .join(Message, Message.id == Document.message_fk)
+            .where(
+                Message.chat_id == chat_id,
+                Document.analysis_content.is_not(None),  # type: ignore
+                Message.sent_at < until,
+                Message.sent_at > since,
+            )
+        )
+        result = await session.execute(stmt)
+        return [row[0] for row in result.all()]

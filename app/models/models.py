@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 
 # Enums
-class DocProcessingStatusEnum(Enum):
+class AnalysisProcessingStatusEnum(Enum):
     NOT_STARTED = "not_started"
     PENDING = "pending"
     ANALYZED = "analyzed"
@@ -70,11 +70,9 @@ class Message(ModelsBase):
     message_type: Mapped[ContentType] = mapped_column(sa.String(50), nullable=False,
                                                           default=ContentType.TEXT)
     sent_at: Mapped[datetime] = mapped_column(sa.DateTime, nullable=False)
-    summary_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("summaries.id"), nullable=True)
 
     chat = relationship("Chat", back_populates="messages")
     sender_user = relationship("User", back_populates="messages")
-    summary = relationship("Summary", back_populates="messages")
     documents = relationship("Document", uselist=False, back_populates="message")
 
 
@@ -87,8 +85,8 @@ class Document(ModelsBase):
     file_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     file_size_bytes: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     analysis_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    processing_status: Mapped[DocProcessingStatusEnum] = mapped_column(String(50), nullable=False,
-                                                                       default=DocProcessingStatusEnum.NOT_STARTED.value)
+    processing_status: Mapped[AnalysisProcessingStatusEnum] = mapped_column(String(50), nullable=False,
+                                                                            default=AnalysisProcessingStatusEnum.NOT_STARTED.value)
     analysis_started_at: Mapped[Optional[datetime]] = mapped_column(sa.DateTime, nullable=True)
     analysis_completed_at: Mapped[Optional[datetime]] = mapped_column(sa.DateTime, nullable=True)
 
@@ -103,5 +101,3 @@ class Summary(ModelsBase):
     summary_content: Mapped[str] = mapped_column(Text, nullable=False)
     messages_since_time: Mapped[datetime] = mapped_column(sa.DateTime, nullable=False)
     messages_until_time: Mapped[datetime] = mapped_column(sa.DateTime, nullable=False)
-
-    messages = relationship("Message", back_populates="summary")

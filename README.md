@@ -10,9 +10,16 @@ This Telegram bot records all messages in group chats and provides daily summari
 - Parallel processing for efficient summary distribution
 - Containerized with Docker and docker-compose
 
+## Analysis worker and summary scheduler
+
+```bash
+python -m app.ai_analysis
+```
+
 ## Setup
 
 1. Clone the repository
 2. Create a `.env` file based on `.env.example`
-3. Run with Docker Compose:
-4. 
+3. Run with Docker Compose
+4. Run app/main.py
+5. Run `python -m app.ai_analysis`
