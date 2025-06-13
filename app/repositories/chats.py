@@ -6,7 +6,7 @@ from aiogram.enums import ContentType
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
-from app.models.models import Chat, ChatAdmin, ChatSettings, Message
+from app.models.models import Chat, ChatAdmin, ChatSettings, Message, Document
 
 
 class ChatsRepository:
@@ -114,8 +114,7 @@ class ChatsRepository:
         )
         
         session.add(message)
-        await session.commit()
-        await session.refresh(message)
+        await session.flush()
         return message
 
     async def set_summary_time(self, chat_id: int, time: time, session: AsyncSession) -> None:
@@ -128,4 +127,17 @@ class ChatsRepository:
         else:
             settings.summary_time = time
         await session.commit()
+
+    async def add_document(self, message_id: int, telegram_file_id: str,
+                           file_name: str, file_type: str, file_size: int, session: AsyncSession) -> Document:
+        document = Document(
+            message_fk=message_id,
+            telegram_file_id=telegram_file_id,
+            file_name=file_name,
+            file_type=file_type,
+            file_size_bytes=file_size
+        )
+        session.add(document)
+        await session.flush()
+        return document
 

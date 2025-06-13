@@ -12,6 +12,7 @@ import sqlalchemy as sa
 
 # Enums
 class DocProcessingStatusEnum(Enum):
+    NOT_STARTED = "not_started"
     PENDING = "pending"
     ANALYZED = "analyzed"
     ERROR = "error"
@@ -74,25 +75,24 @@ class Message(ModelsBase):
     chat = relationship("Chat", back_populates="messages")
     sender_user = relationship("User", back_populates="messages")
     summary = relationship("Summary", back_populates="messages")
-    document = relationship("Document", uselist=False, back_populates="message")
+    documents = relationship("Document", uselist=False, back_populates="message")
 
 
 class Document(ModelsBase):
     __tablename__ = "documents"
 
-    message_fk: Mapped[int] = mapped_column(ForeignKey("messages.id"), nullable=False, unique=True)
-    telegram_file_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    message_fk: Mapped[int] = mapped_column(ForeignKey("messages.id"), nullable=False)
+    telegram_file_id: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     file_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     file_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     file_size_bytes: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
     analysis_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     processing_status: Mapped[DocProcessingStatusEnum] = mapped_column(String(50), nullable=False,
-                                                                       default=DocProcessingStatusEnum.PENDING)
+                                                                       default=DocProcessingStatusEnum.NOT_STARTED.value)
     analysis_started_at: Mapped[Optional[datetime]] = mapped_column(sa.DateTime, nullable=True)
     analysis_completed_at: Mapped[Optional[datetime]] = mapped_column(sa.DateTime, nullable=True)
-    document_received_at: Mapped[datetime] = mapped_column(sa.DateTime, nullable=False, default=sa.func.now())
 
-    message = relationship("Message", back_populates="document")
+    message = relationship("Message", back_populates="documents")
 
 
 class Summary(ModelsBase):

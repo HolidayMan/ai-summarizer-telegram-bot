@@ -4,8 +4,9 @@ from datetime import time as time_type, datetime
 from typing import Optional
 
 from aiogram.enums import ContentType
+from aiogram.types import Message
 
-from app.models.models import Message
+from app.models.models import Message as MessageModel
 from app.external_services.external_services import ExternalServices
 from app.models.models import Chat, User
 from app.repositories import Repositories
@@ -38,22 +39,29 @@ class ChatsService:
 
     async def add_message(
         self,
-        chat_id: int,
-        user_id: int,
-        message_text: str | None,
-        message_type: ContentType,
-        sent_at: datetime
-    ) -> Message:
-
+        message: Message
+    ) -> MessageModel:
         async with ExternalServices.database.session() as session:
-            return await Repositories.chats.add_message(
-                chat_id=chat_id,
-                user_id=user_id,
-                message_text=message_text,
-                message_type=message_type,
-                sent_at=sent_at,
+            new_message = await Repositories.chats.add_message(
+                chat_id=message.chat.id,
+                user_id=message.from_user.id,
+                message_text=message.text,
+                message_type=message.content_type,
+                sent_at=datetime.now(),
                 session=session
             )
+            if message.content_type is ContentType.DOCUMENT and message.document is not None:
+                if all([message.document.file_name, message.document.mime_type, message.document.file_size]):
+                    await Repositories.chats.add_document(
+                        message_id=new_message.id,
+                        telegram_file_id=message.document.file_id,
+                        file_name=message.document.file_name,  # type: ignore
+                        file_type=message.document.mime_type,  # type: ignore
+                        file_size=message.document.file_size,  # type: ignore
+                        session=session
+                    )
+            await session.commit()
+            return new_message
 
     async def set_summary_time(self, chat_id: int, time: time_type) -> None:
         async with ExternalServices.database.session() as session:
